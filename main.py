@@ -29,6 +29,9 @@ def sanitize(msg):
 
 @bot.event
 async def on_message(message: discord.Message):
+    if message.author.name == "Migsej":
+        return
+
     if message.author == bot.user or message.channel.id != COUNTING_CHANNEL_ID:
         return
 
