@@ -11,7 +11,7 @@ Monitors a counting channel and ensures:
 
 Violations are logged and invalid messages deleted. Edits and deletions are also logged but the perpetrator must be dealt with "manually".
 
-Logs contain the violating message in triple-backticks to prevent inections and messages are sanitized before being logged (backticks removed and content truncated to at most 100 characters to avoid other reflection issues).
+Logs contain the violating message in triple-backticks to prevent injections and messages are sanitized before being logged (backticks removed and content truncated to at most 100 characters to avoid other reflection issues).
 
 ## Usage
 
