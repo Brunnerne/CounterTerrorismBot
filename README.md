@@ -19,8 +19,11 @@ Add a `.env` file with contents:
 
 ```env
 BOT_TOKEN=<Discord bot token>
+GUILD_ID=<Server ID>
 COUNTING_CHANNEL_ID=<ID of counting channel to monitor>
 LOG_CHANNEL_ID=<ID of channel to log violations in>
 ```
 
 Install dependencies with `pip install -r requirements.txt` and run bot with `python main.py`.
+
+Use the slash command `/counters` to get counting stats for each participant, sorted by most counts.
