@@ -9,7 +9,7 @@ Monitors a counting channel and ensures:
 3. No two consecutive messages are from the same authors
 4. Message has no attachments
 
-Violations are logged and invalid messages deleted. Edits and deletions are also logged but the perpetrator must be dealt with "manually".
+Violations and edits are logged and invalid messages deleted. Deletions are also logged but the perpetrator must be dealt with "manually".
 
 Logs contain the violating message in triple-backticks to prevent injections and messages are sanitized before being logged (backticks removed and content truncated to at most 100 characters to avoid other reflection issues).
 
@@ -26,4 +26,4 @@ LOG_CHANNEL_ID=<ID of channel to log violations in>
 
 Install dependencies with `pip install -r requirements.txt` and run bot with `python main.py`.
 
-Use the slash command `/counters` to get counting stats for each participant, sorted by most counts.
+Use the slash command `/counters` to get counting stats for each participant, sorted by most counts. This command is ignored in the counting channel.
