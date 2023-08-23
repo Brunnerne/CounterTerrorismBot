@@ -40,6 +40,9 @@ async def aenumerate(asequence):
 
 @tree.command(name="counters", description="Counting statistics", guild=discord.Object(id=GUILD_ID))
 async def stats(interaction: discord.Interaction):
+    if interaction.channel.id == COUNTING_CHANNEL_ID:
+        return
+
     # Respond immediately and send stats as normal message later
     # (Discord has 3 second response limit)
     await interaction.response.send_message("Collecting stats...")
