@@ -110,8 +110,11 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
     await bot.get_channel(LOG_CHANNEL_ID).send(
         f""":bell: SHAME, SHAME, SHAME :bell:
 [<#{COUNTING_CHANNEL_ID}>] <@{before.author.id}> edited their message{message}
+Message has been deleted
 """
     )
+    bot_deletions.append(after.id)
+    await after.delete()
 
 
 @bot.event
