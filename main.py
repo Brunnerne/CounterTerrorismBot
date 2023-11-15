@@ -1,4 +1,6 @@
 from collections import defaultdict
+from discord import app_commands
+import asyncio
 import discord
 import dotenv
 import os
@@ -38,6 +40,31 @@ async def aenumerate(asequence):
         n += 1
 
 
+async def get_invalid():
+    counting_channel = bot.get_channel(COUNTING_CHANNEL_ID)
+    messages = counting_channel.history(limit=None, oldest_first=True)
+    current = 0
+    invalid = []
+    async for i, msg in aenumerate(messages):
+        if len(invalid) > 0:
+            invalid.append(msg)
+            continue
+
+        if int(msg.content) == current + 1:
+            current += 1
+        else:
+            invalid.append(msg)
+
+    return invalid
+
+
+async def purge(invalid):
+    # Delete latest first
+    for msg in invalid[::-1]:
+        bot_deletions.append(msg.id)
+        await msg.delete()
+
+
 @tree.command(name="counters", description="Counting statistics", guild=discord.Object(id=GUILD_ID))
 async def stats(interaction: discord.Interaction):
     if interaction.channel.id == COUNTING_CHANNEL_ID:
@@ -63,6 +90,23 @@ async def stats(interaction: discord.Interaction):
     response += "```"
 
     await interaction.channel.send(response)
+
+
+@tree.command(name="validate", description="Validate order and purge mistakes", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
+async def validate(interaction: discord.Interaction):
+    if interaction.channel.id == COUNTING_CHANNEL_ID:
+        return
+
+    await interaction.response.send_message("Validating...")
+    invalid = await get_invalid()
+    if len(invalid) == 0:
+        await interaction.channel.send("No errors found in sequence")
+        return
+
+    await interaction.channel.send(f"Error(s) found, purging {len(invalid)} messages...")
+    await purge(invalid)
+    await interaction.channel.send(f"Invalid messages purged, sequence restored!")
 
 
 @bot.event
@@ -109,15 +153,16 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
     if before.channel.id != COUNTING_CHANNEL_ID:
         return
 
+    if len(await get_invalid()) == 0:
+        return
+
     message = sanitize(f"{before.content} -> {after.content}")
     await bot.get_channel(LOG_CHANNEL_ID).send(
         f""":bell: SHAME, SHAME, SHAME :bell:
 [<#{COUNTING_CHANNEL_ID}>] <@{before.author.id}> edited their message{message}
-Message has been deleted
+Please edit your post back
 """
     )
-    bot_deletions.append(after.id)
-    await after.delete()
 
 
 @bot.event
@@ -127,8 +172,12 @@ async def on_message_delete(message: discord.Message):
 
     await bot.get_channel(LOG_CHANNEL_ID).send(
         f""":bell: SHAME, SHAME, SHAME :bell:
-[<#{COUNTING_CHANNEL_ID}>] A message by <@{message.author.id}> was deleted{sanitize(message.content)}"""
+[<#{COUNTING_CHANNEL_ID}>] A message by <@{message.author.id}> was deleted{sanitize(message.content)}
+Purging all subsequent posts..."""
     )
+
+    invalid = await get_invalid()
+    await purge(invalid)
 
 
 @bot.event
